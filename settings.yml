@@ -1,0 +1,21 @@
+instances:
+  - name: kubemaster
+    type: master
+    count: 1
+    settings:
+      box: "centos/7"
+      cpus: 2
+      memory: 2048
+      disk_size: "20GB"
+      network:
+        private_network_ip: "192.168.33.100"
+  - name: kubenode
+    type: node
+    count: 2
+    settings:
+      box: "centos/7"
+      cpus: 2
+      memory: 2048
+      disk_size: "20GB"
+      network:
+        private_network_ip: "192.168.33.100"

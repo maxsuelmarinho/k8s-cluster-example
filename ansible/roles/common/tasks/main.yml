@@ -1,0 +1,23 @@
+---
+- name: upgrade all packages
+  yum:
+    name: "*"
+    state: latest
+
+- name: install packages
+  yum:
+    name: "{{ packages }}"
+    state: latest
+  vars:
+    packages:
+    - wget
+    - unzip
+    - net-tools
+    - sshpass
+    - tree
+    - vim
+    - git
+    - jq
+    - httpie
+    - java-1.8.0-openjdk
+    - java-1.8.0-openjdk-devel

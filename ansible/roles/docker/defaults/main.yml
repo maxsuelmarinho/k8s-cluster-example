@@ -1,0 +1,4 @@
+---
+docker_users: [ "vagrant" ]
+docker_group: "docker"
+docker_version: "18.06"

@@ -1,0 +1,74 @@
+- name: remove old docker versions
+  yum:
+    name: "{{ packages }}"
+    state: removed
+  vars:
+    packages:
+    - docker
+    - docker-client
+    - docker-client-latest
+    - docker-common
+    - docker-latest
+    - docker-latest-logrotate
+    - docker-logrotate
+    - docker-selinux
+    - docker-engine-selinux
+    - docker-engine
+    - docker-ce*
+
+- name: install required packages
+  yum:
+    name: "{{ packages }}"
+    state: latest
+  vars:
+    packages:
+    - yum-utils
+    - device-mapper-persistent-data
+    - lvm2
+
+- name: add docker ce stable repository
+  get_url:
+    url: https://download.docker.com/linux/centos/docker-ce.repo
+    dest: /etc/yum.repos.d/docker-ce.repo
+    mode: 0644
+
+- name: install docker ce v{{ docker_version }}
+  yum:
+    name: "docker-ce-{{ docker_version }}*"
+    state: present
+    update_cache: yes
+
+- name: ensure docker is running
+  service:
+    name: docker
+    state: started
+    enabled: yes
+
+- name: create a docker group
+  group:
+    name: docker
+    state: present
+
+- name: add users to docker group
+  user:
+    name: "{{ item }}"
+    groups: "{{ docker_group }}"
+    append: yes
+  with_items: "{{ docker_users }}"
+
+- name: create docker config directory
+  file:
+    path: /etc/docker
+    state: directory
+    mode: 0600
+    owner: root
+    group: root
+
+- name: configure docker daemon
+  template:
+    src: daemon.json.j2
+    dest: /etc/docker/daemon.json
+    mode: 0400
+    owner: root
+    group: "{{ docker_group }}"
+  notify: restart docker

@@ -1,0 +1,16 @@
+---
+- name: check if epel repository is already configured
+  stat:
+    path: "{{ epel_repository_file_path }}"
+  register: epel_repository_file_result
+- name: install epel repository
+  yum:
+    name: "{{ epel_repository_url }}"
+    state: present
+  register: result
+  when: not epel_repository_file_result.stat.exists
+- name: import epel gpg key
+  rpm_key:
+    key: "{{ epel_repository_gpg_key_url }}"
+    state: present
+  when: not epel_repository_file_result.stat.exists
