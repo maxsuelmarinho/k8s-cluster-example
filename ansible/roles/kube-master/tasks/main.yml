@@ -3,26 +3,28 @@
   debug:
     msg: "ip: {{ ansible_default_ipv4.address }}"
 
-- name: start kubelet
-  service:
-    name: kubelet
-    state: started
-
 - name: verify connectivity to gcr.io registries
   command: kubeadm config images pull
+  register: kubeadm_config_images_pull
+
+- debug: var=kubeadm_config_images_pull.stdout_lines
+
+- name: check kubeadm is already initialized
+  command: "kubeadm token list"
+  register: kubeadm_check
+  ignore_errors: True
 
 - name: initialise master node
-  command: "kubeadm init --apiserver-advertise-address={{ ansible_default_ipv4.address }} --pod-network-cidr={{ pod_network_cidr }}"
-  register: kubeadm_output
+  command: "kubeadm init --apiserver-advertise-address={{ apiserver_advertise_address }} --pod-network-cidr={{ pod_network_cidr }}"
+  register: kubeadm_init_output
+  when: kubeadm_check.rc != 0
 
-- name: set fact for kubeadm join command
-  set_fact:
-    kubeadm_join_cmd: '{{ kubeadm_output.stdout_lines | last }}'
+- debug: var=kubeadm_init_output.stdout_lines
 
 - name: create .kube directory
   become: no
   file:
-    path: /home/vagrant/.kube
+    path: "/home/vagrant/.kube"
     state: directory
     owner: vagrant
     group: vagrant
@@ -36,14 +38,37 @@
     owner: vagrant
     group: vagrant
 
+- name: create .kube directory for root user
+  become: no
+  file:
+    path: "/root/.kube"
+    state: directory
+    owner: root
+    group: root
+  register: root_kube_dir
+
+- name: copy kube config for root user
+  copy:
+    src: /etc/kubernetes/admin.conf
+    dest: '{{ root_kube_dir.path }}/config'
+    remote_src: yes
+    owner: root
+    group: root
+
 - name: deploy pod network
+  become: no
   command: kubectl apply -f {{ item }}
   loop:
     - https://docs.projectcalico.org/v3.8/manifests/calico.yaml
   
 - name: list tokens
   command: kubeadm token list
+  register: kubeadm_token_list
+
+- debug: var=kubeadm_token_list.stdout_lines
 
 - name: token ca cert hash
   shell: "openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2>/dev/null | openssl dgst -sha256 -hex | sed 's/^.* //'"
   register: token_ca_cert_hash_output
+
+- debug: var=token_ca_cert_hash_output.stdout_lines
