@@ -15,13 +15,18 @@ class Peon
           node.ssh.shell = "bash -c 'BASH_ENV=/etc/profile exec bash'"
           node.ssh.forward_agent = true
 
+          network_settings = instance_settings["network"]
+          node_ip = ""
+          pod_network_cidr = network_settings["pod_network_cidr"] ||= ""
+          if instance["type"] == "master" && pod_network_cidr.empty? then
+            abort "'pod_network_cidr' is required for instance type 'master'."
+          end
           node.vm.provider "virtualbox" do |vb|
             node.vbguest.auto_update = instance_settings["vbguest_auto_update"] ||= true
             node.disksize.size = instance_settings["disk_size"] ||= "20GB"
-            network_settings = instance_settings["network"]
             private_network_ip = network_settings["private_network_ip"].split(".")
-            ip = "#{private_network_ip[0]}.#{private_network_ip[1]}.#{private_network_ip[2]}.#{private_network_ip[3].to_i + i}"
-            node.vm.network :private_network, ip: ip
+            node_ip = "#{private_network_ip[0]}.#{private_network_ip[1]}.#{private_network_ip[2]}.#{private_network_ip[3].to_i + i}"
+            node.vm.network :private_network, ip: node_ip
 
             vb.name = "#{instance["name"]}-#{i}"
             vb.linked_clone = true
@@ -40,7 +45,7 @@ class Peon
 
           node.vm.provision "shell" do |s|
             s.name = "Execute Ansible Playbook"
-            s.inline = "ansible-playbook /vagrant/ansible/playbook.yml -i \"localhost,\" -c local"        
+            s.inline = "ansible-playbook /vagrant/ansible/playbook.yml -i \"localhost,\" -c local --extra-vars \"node_type=#{instance["type"]} apiserver_advertise_address=#{node_ip} pod_network_cidr=#{pod_network_cidr}\""
           end
         end
       end

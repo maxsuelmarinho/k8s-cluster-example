@@ -14,8 +14,7 @@
     state: disabled
 
 - name: disable SWAP since kubernetes can't work with swap enabled (1/2)
-  shell: |
-    swapoff -a
+  command: "swapoff -a"
 
 - name: disable SWAP in fstab since kubernetes can't work with swap enabled (2/2)
   replace:

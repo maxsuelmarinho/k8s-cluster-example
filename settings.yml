@@ -5,15 +5,16 @@ instances:
     settings:
       box: "centos/7"
       cpus: 2
-      memory: 1024
+      memory: 2048
       disk_size: "20GB"
       vbguest_auto_update: false
       box_check_update: false
       network:
         private_network_ip: "192.168.33.100"
-  - name: kubenode
-    type: node
-    count: 1
+        pod_network_cidr: "192.168.0.0/16"
+  - name: kubeworker
+    type: worker
+    count: 0
     settings:
       box: "centos/7"
       cpus: 2

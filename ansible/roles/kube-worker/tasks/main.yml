@@ -1,0 +1,8 @@
+---
+- local_action: debug msg="kube-worker tasks"
+
+- name: print IP addresses
+  debug:
+    msg: "{% for host in groups['all'] %}
+            {{ hostvars[host]['ansible_host'] }}
+          {% endfor %}"

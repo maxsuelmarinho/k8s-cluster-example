@@ -10,6 +10,7 @@
     state: latest
   vars:
     packages:
+    - vim
     - wget
     - unzip
     - net-tools
@@ -19,5 +20,3 @@
     - git
     - jq
     - httpie
-    - java-1.8.0-openjdk
-    - java-1.8.0-openjdk-devel

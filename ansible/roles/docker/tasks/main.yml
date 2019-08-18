@@ -1,3 +1,7 @@
+- name: check docker version
+  shell: "docker version 2>&1 | awk '/Version:/{print $2}' | head -1"
+  register: docker_check
+
 - name: remove old docker versions
   yum:
     name: "{{ packages }}"
@@ -15,6 +19,7 @@
     - docker-engine-selinux
     - docker-engine
     - docker-ce*
+  when: docker_check.stdout.find(docker_version) != 0
 
 - name: install required packages
   yum:
@@ -25,12 +30,14 @@
     - yum-utils
     - device-mapper-persistent-data
     - lvm2
+  when: docker_check.stdout.find(docker_version) != 0
 
 - name: add docker ce stable repository
   get_url:
     url: https://download.docker.com/linux/centos/docker-ce.repo
     dest: /etc/yum.repos.d/docker-ce.repo
     mode: 0644
+  when: docker_check.stdout.find(docker_version) != 0
 
 - name: install docker ce v{{ docker_version }}
   yum:
@@ -70,5 +77,14 @@
     dest: /etc/docker/daemon.json
     mode: 0400
     owner: root
-    group: "{{ docker_group }}"
+    group: "{{ docker_group }}"  
+
+- name: Create a directory if it does not exist
+  file:
+    path: /etc/systemd/system/docker.service.d
+    state: directory
+
+- name: just force systemd to reread configs
+  systemd:
+    daemon_reload: yes
   notify: restart docker

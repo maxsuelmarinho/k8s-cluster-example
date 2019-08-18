@@ -1,0 +1,49 @@
+---
+- name: kube master ip
+  debug:
+    msg: "ip: {{ ansible_default_ipv4.address }}"
+
+- name: start kubelet
+  service:
+    name: kubelet
+    state: started
+
+- name: verify connectivity to gcr.io registries
+  command: kubeadm config images pull
+
+- name: initialise master node
+  command: "kubeadm init --apiserver-advertise-address={{ ansible_default_ipv4.address }} --pod-network-cidr={{ pod_network_cidr }}"
+  register: kubeadm_output
+
+- name: set fact for kubeadm join command
+  set_fact:
+    kubeadm_join_cmd: '{{ kubeadm_output.stdout_lines | last }}'
+
+- name: create .kube directory
+  become: no
+  file:
+    path: /home/vagrant/.kube
+    state: directory
+    owner: vagrant
+    group: vagrant
+  register: kube_dir
+
+- name: copy kube config
+  copy:
+    src: /etc/kubernetes/admin.conf
+    dest: '{{ kube_dir.path }}/config'
+    remote_src: yes
+    owner: vagrant
+    group: vagrant
+
+- name: deploy pod network
+  command: kubectl apply -f {{ item }}
+  loop:
+    - https://docs.projectcalico.org/v3.8/manifests/calico.yaml
+  
+- name: list tokens
+  command: kubeadm token list
+
+- name: token ca cert hash
+  shell: "openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2>/dev/null | openssl dgst -sha256 -hex | sed 's/^.* //'"
+  register: token_ca_cert_hash_output

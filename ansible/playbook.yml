@@ -5,6 +5,12 @@
   gather_facts: true
   roles:
     - epel-repository
-    - common
+    - role: common
+      when: skip_role_common is undefined
     - docker
     - kube
+    - role: kube-master
+      when: node_type == "master"
+    - role: kube-worker
+      when: node_type == "worker"
+
