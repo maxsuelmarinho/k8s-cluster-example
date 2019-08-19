@@ -1,8 +1,13 @@
 ---
-- local_action: debug msg="kube-worker tasks"
+- name:  reset all kubeadm installed state
+  command: kubeadm reset --force
+  ignore_errors: true
 
-- name: print IP addresses
-  debug:
-    msg: "{% for host in groups['all'] %}
-            {{ hostvars[host]['ansible_host'] }}
-          {% endfor %}"
+- stat:
+    path: /vagrant/join-command.sh
+  register: join_command
+
+- name: join cluster
+  script: join_command.stat.path
+  when: join_command.stat.isFile is defined and join_command.stat.isFile
+  

@@ -1,0 +1,13 @@
+---
+version: '3.7'
+
+services:
+  rancher-server:
+    image: rancher/server:stable
+    container_name: rancher-server
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 2
+        delay: 10s
+        order: stop-first

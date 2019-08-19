@@ -9,17 +9,8 @@
       when: skip_role_common is undefined
     - docker
     - kube
-
-- hosts: masters
-  become: yes
-  become_method: sudo
-  gather_facts: true
-  roles:
     - role: kube-master
-
-- hosts: workers
-  become: yes
-  become_method: sudo
-  gather_facts: true
-  roles:
+      when: node_type == "master"
     - role: kube-worker
+      when: node_type == "worker"
+

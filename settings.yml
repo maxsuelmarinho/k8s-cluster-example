@@ -14,7 +14,7 @@ instances:
         pod_network_cidr: "192.168.0.0/16"
   - name: kubeworker
     type: worker
-    count: 0
+    count: 1
     settings:
       box: "centos/7"
       cpus: 2

@@ -3,11 +3,13 @@ class Peon
     scripts_home = File.dirname(__FILE__)
     instances = settings["instances"]
 
-    instances.each do |instance|
+    masters = []
+    workers = []
+    instances.each_with_index do |instance, index|
       count = instance["count"]
       (1..count).each do |i|
         
-        config.vm.define "#{instance["name"]}-#{i}" do |node|
+        config.vm.define "#{instance["name"]}-#{i}", primary: instance["type"].eql?("master") do |node|
           node.vm.hostname = "#{instance["name"]}-#{i}"
           instance_settings = instance["settings"]
           node.vm.box = instance_settings["box"]
@@ -17,15 +19,23 @@ class Peon
 
           network_settings = instance_settings["network"]
           node_ip = ""
+          master_node_ip = ""
           pod_network_cidr = network_settings["pod_network_cidr"] ||= ""
-          if instance["type"] == "master" && pod_network_cidr.empty? then
+          if instance["type"].eql?("master") && pod_network_cidr.empty? then
             abort "'pod_network_cidr' is required for instance type 'master'."
           end
           node.vm.provider "virtualbox" do |vb|
             node.vbguest.auto_update = instance_settings["vbguest_auto_update"] ||= true
             node.disksize.size = instance_settings["disk_size"] ||= "20GB"
             private_network_ip = network_settings["private_network_ip"].split(".")
-            node_ip = "#{private_network_ip[0]}.#{private_network_ip[1]}.#{private_network_ip[2]}.#{private_network_ip[3].to_i + i}"
+            node_ip = "#{private_network_ip[0]}.#{private_network_ip[1]}.#{private_network_ip[2]}.#{private_network_ip[3].to_i + i}"            
+            if instance["type"].eql?("master") then
+              master_node_ip = node_ip
+              masters.push(node_ip)
+            else
+              workers.push(node_ip)
+            end
+            
             node.vm.network :private_network, ip: node_ip
 
             vb.name = "#{instance["name"]}-#{i}"
@@ -37,18 +47,34 @@ class Peon
             vb.customize ["modifyvm", :id, "--cpus", instance_settings["cpus"] ||= "1"]
           end
 
-          node.vm.provision "shell" do |s|
-            s.name = "Install Ansible"
-            s.path = scripts_home + "/ansible-install.sh"
-            s.args = "2.6.1"
-          end
+          #node.vm.provision "shell" do |s|
+          #  s.name = "Install Ansible"
+          #  s.path = scripts_home + "/ansible-install.sh"
+          #  s.args = "2.6.1"
+          #end
 
-          node.vm.provision "shell" do |s|
-            s.name = "Execute Ansible Playbook"
-            s.inline = "ansible-playbook /vagrant/ansible/playbook.yml -i \"localhost,\" -c local --extra-vars \"node_type=#{instance["type"]} apiserver_advertise_address=#{node_ip} pod_network_cidr=#{pod_network_cidr}\""
+          #node.vm.provision "shell" do |s|
+          #  s.name = "Execute Ansible Playbook"
+          #  s.inline = "ansible-playbook /vagrant/ansible/playbook.yml -i \"localhost,\" -c local --extra-vars \"node_type=#{instance["type"]} apiserver_advertise_address=#{node_ip} pod_network_cidr=#{pod_network_cidr}\""
+          #end
+          print "instance size: #{instances.size}; index: #{index}; i: #{i}\n"
+          if index == instances.size - 1 && i == count then
+            node.vm.provision :ansible do |ansible|
+              # disable default limit to connect to all the machines
+              ansible.limit = "all"
+              ansible.playbook = "ansible/playbook.yml"
+              ansible.groups = {
+                "masters" => masters,
+                "workers" => workers,
+                "masters:vars" => {
+                  "apiserver_advertise_address" => "#{master_node_ip}",
+                  "pod_network_cidr" => "#{pod_network_cidr}"
+                }
+              }
+            end        
           end
         end
-      end
+      end     
     end    
   end
 end

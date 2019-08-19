@@ -9,15 +9,29 @@
 
 - debug: var=kubeadm_config_images_pull.stdout_lines
 
-- name: check kubeadm is already initialized
-  command: "kubeadm token list"
-  register: kubeadm_check
+- name: check kubeadm is already initialized 1/2
+  command: "kubeadm init --dry-run --apiserver-advertise-address={{ apiserver_advertise_address }} --pod-network-cidr={{ pod_network_cidr }}"
+  register: kubeadm_check_1
   ignore_errors: True
+
+- debug: var=kubeadm_check_1.stdout_lines
+
+- name: check kubeadm is already initialized 2/2
+  command: "kubeadm token list"
+  register: kubeadm_check_2
+  ignore_errors: True
+
+- debug: var=kubeadm_check_2.stdout_lines
+
+- name: clean up cluster state
+  include_role:
+    name: tear-down
+  when: kubeadm_check_1.rc == 0 and kubeadm_check_2.rc != 0
 
 - name: initialise master node
   command: "kubeadm init --apiserver-advertise-address={{ apiserver_advertise_address }} --pod-network-cidr={{ pod_network_cidr }}"
   register: kubeadm_init_output
-  when: kubeadm_check.rc != 0
+  when: kubeadm_check_1.rc == 0
 
 - debug: var=kubeadm_init_output.stdout_lines
 
@@ -39,7 +53,7 @@
     group: vagrant
 
 - name: create .kube directory for root user
-  become: no
+  become: yes
   file:
     path: "/root/.kube"
     state: directory
@@ -48,6 +62,7 @@
   register: root_kube_dir
 
 - name: copy kube config for root user
+  become: yes
   copy:
     src: /etc/kubernetes/admin.conf
     dest: '{{ root_kube_dir.path }}/config'
@@ -72,3 +87,11 @@
   register: token_ca_cert_hash_output
 
 - debug: var=token_ca_cert_hash_output.stdout_lines
+
+- stat:
+    path: /vagrant/join-command.sh
+  register: join_command
+
+- name: saving token for worker nodes
+  shell: "kubeadm token create --print-join-command >> /vagrant/join-command.sh"
+  when: join_command.stat.isFile is undefined
