@@ -1,0 +1,25 @@
+---
+- name: drain nodes
+  command: "kubectl drain {{ item }} --delete-local-data --force --ignore-daemonsets"
+  loop:
+    - kubeworker-1
+    - kubeworker-2
+    - kubemaster-1
+  ignore_errors: true
+
+# todo: get the items from a variable
+- name: delete nodes
+  command: "kubectl delete node {{ item }}"
+  loop:
+    - kubeworker-1
+    - kubeworker-2
+    - kubemaster-1
+  ignore_errors: true
+
+- name: clean up iptables rules
+  become: yes
+  shell: "iptables -F && iptables -t nat -F && iptables -t mangle -F && iptables -X"
+
+- name: reset kubeadm state
+  become: yes
+  command: "kubeadm rest --force"  
