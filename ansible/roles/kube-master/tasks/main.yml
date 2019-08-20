@@ -35,6 +35,10 @@
 
 - debug: var=kubeadm_init_output.stdout_lines
 
+- name: Set fact for kubeadm join command
+  set_fact:
+    kubeadm_join_cmd: '{{ kubeadm_init_output.stdout_lines | last }}'
+
 - name: create .kube directory
   become: no
   file:

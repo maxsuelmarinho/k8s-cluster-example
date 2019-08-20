@@ -43,7 +43,7 @@
   become: yes
   sysctl:
     name: net.bridge.bridge-nf-call-ip6tables
-    value: 1
+    value: "1"
     sysctl_set: yes
     state: present
     reload: yes
@@ -52,7 +52,7 @@
   become: yes
   sysctl:
     name: net.bridge.bridge-nf-call-iptables
-    value: 1
+    value: "1"
     sysctl_set: yes
     state: present
     reload: yes

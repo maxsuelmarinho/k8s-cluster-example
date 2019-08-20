@@ -7,7 +7,11 @@
     path: /vagrant/join-command.sh
   register: join_command
 
-- name: join cluster
+- name: join cluster 1/2
   script: join_command.stat.path
   when: join_command.stat.isFile is defined and join_command.stat.isFile
+
+- name: join cluster 2/2
+  command: '{{ hostvars[groups["masters"][0]]["kubeadm_join_cmd"] }}'
+  when: join_command.stat.isFile is undefined
   
