@@ -35,9 +35,9 @@
 
 - debug: var=kubeadm_init_output.stdout_lines
 
-- name: Set fact for kubeadm join command
-  set_fact:
-    kubeadm_join_cmd: '{{ kubeadm_init_output.stdout_lines | last }}'
+- name: extra vars
+  debug:
+    msg: "apiserver_advertise_address: {{ apiserver_advertise_address }}; pod_network_cidr: {{ pod_network_cidr }}"
 
 - name: create .kube directory
   become: no
@@ -92,10 +92,36 @@
 
 - debug: var=token_ca_cert_hash_output.stdout_lines
 
-- stat:
-    path: /vagrant/join-command.sh
+#- stat:
+#    path: /vagrant/join-command.sh
+#  register: join_command
+
+- name: create token for worker nodes
+  command: "kubeadm token create --print-join-command"
   register: join_command
 
+- debug: var=join_command.stdout
+
+#- name: create join command
+#  template:
+#    src: join_command.stdout
+#    dest: /vagrant/join-command.sh
+#    owner: root
+#    group: root
+#    mode: "a+x"
+
+- name: create join command
+  copy:
+    content: "{{ join_command.stdout }}"
+    dest: /vagrant/join-command.sh
+    owner: root
+    group: root
+    mode: "a+x"
+
+- name: Set fact for kubeadm join command
+  set_fact:
+    kubeadm_join_cmd: "{{ join_command.stdout }}"
+
 - name: saving token for worker nodes
-  shell: "kubeadm token create --print-join-command >> /vagrant/join-command.sh"
+  shell: " >> /vagrant/join-command.sh"
   when: join_command.stat.isFile is undefined

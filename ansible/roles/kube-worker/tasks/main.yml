@@ -10,6 +10,9 @@
 - name: join cluster 1/2
   script: join_command.stat.path
   when: join_command.stat.isFile is defined and join_command.stat.isFile
+  ignore_errors: true
+
+#- debug: var='{{ hostvars[groups["masters"][0]]["kubeadm_join_cmd"] }}'
 
 - name: join cluster 2/2
   command: '{{ hostvars[groups["masters"][0]]["kubeadm_join_cmd"] }}'
