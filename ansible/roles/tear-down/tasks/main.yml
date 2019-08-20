@@ -22,4 +22,4 @@
 
 - name: reset kubeadm state
   become: yes
-  command: "kubeadm rest --force"  
+  command: "kubeadm reset --force"  

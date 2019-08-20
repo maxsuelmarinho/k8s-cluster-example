@@ -34,10 +34,11 @@ class Peon
               end
             end
             node.vbguest.auto_update = instance_settings["vbguest_auto_update"] ||= true
+            # disk re-size does not work on WSL
             #node.disksize.size = instance_settings["disk_size"] ||= "20GB"
             private_network_ip = network_settings["private_network_ip"].split(".")
             node_ip = "#{private_network_ip[0]}.#{private_network_ip[1]}.#{private_network_ip[2]}.#{private_network_ip[3].to_i + i}"
-            #print "Defining instance ##{index} - name: #{instance_name}; type: #{instance["type"]}; ip: #{node_ip}\n"
+            
             if instance["type"].eql?("master") then
               master_node_ip = node_ip
               masters.push(instance_name)
@@ -66,11 +67,8 @@ class Peon
           #  s.name = "Execute Ansible Playbook"
           #  s.inline = "ansible-playbook /vagrant/ansible/playbook.yml -i \"localhost,\" -c local --extra-vars \"node_type=#{instance["type"]} apiserver_advertise_address=#{node_ip} pod_network_cidr=#{pod_network_cidr}\""
           #end
-          #print "instance size: #{instances.size}; index: #{index}; i: #{i}\n"
+          
           if index == instances.size - 1 && i == count then
-            masters = masters.uniq
-            workers = workers.uniq
-            #print "masters: #{masters.size}; workers: #{workers.size}\n"
             node.vm.provision :ansible do |ansible|
               # disable default limit to connect to all the machines
               ansible.limit = "all"
@@ -80,8 +78,8 @@ class Peon
                 "pod_network_cidr" => "#{pod_network_cidr}"
               }
               ansible.groups = {
-                "masters" => masters,
-                "workers" => workers
+                "masters" => masters.uniq!,
+                "workers" => workers.uniq!
               }
             end        
           end
