@@ -3,14 +3,17 @@ class Peon
     scripts_home = File.dirname(__FILE__)
     instances = settings["instances"]
 
-    masters = []
-    workers = []
+    master_settings = instances.find { |item| item["type"] == "master" }
+    worker_settings = instances.find { |item| item["type"] == "worker" }
+    masters = (1..master_settings["count"]).each.map { |i| "#{master_settings["name"]}-#{i}" }
+    workers = (1..worker_settings["count"]).each.map { |i| "#{worker_settings["name"]}-#{i}" }
+
     instances.each_with_index do |instance, index|
       count = instance["count"]
       (1..count).each do |i|
         
         instance_name = "#{instance["name"]}-#{i}"
-        config.vm.define instance_name, primary: instance["type"].eql?("master") do |node|
+        config.vm.define instance_name, primary: instance["type"] == "master" do |node|
           node.vm.hostname = instance_name
           instance_settings = instance["settings"]
           node.vm.box = instance_settings["box"]
@@ -22,7 +25,7 @@ class Peon
           node_ip = ""
           master_node_ip = ""
           pod_network_cidr = network_settings["pod_network_cidr"] ||= ""
-          if instance["type"].eql?("master") && pod_network_cidr.empty? then
+          if instance["type"] == "master" && pod_network_cidr.empty? then
             abort "'pod_network_cidr' is required for instance type 'master'."
           end
           node.vm.provider "virtualbox" do |vb|
@@ -39,11 +42,8 @@ class Peon
             private_network_ip = network_settings["private_network_ip"].split(".")
             node_ip = "#{private_network_ip[0]}.#{private_network_ip[1]}.#{private_network_ip[2]}.#{private_network_ip[3].to_i + i}"
             
-            if instance["type"].eql?("master") then
+            if instance["type"] == "master" then
               master_node_ip = node_ip
-              masters.push(instance_name)
-            else
-              workers.push(instance_name)
             end
             
             node.vm.network :private_network, ip: node_ip
@@ -78,8 +78,8 @@ class Peon
                 "pod_network_cidr" => "#{pod_network_cidr}"
               }
               ansible.groups = {
-                "masters" => masters.uniq!,
-                "workers" => workers.uniq!
+                "masters" => masters,
+                "workers" => workers
               }
             end        
           end
