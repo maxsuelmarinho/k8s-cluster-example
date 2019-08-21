@@ -43,4 +43,14 @@ $ ipvsadm -C
 
 # CNI plugin configuration
 $ ls /etc/cni/net.d/
+
+# Token
+$ TOKEN=$(dd if=/dev/urandom bs=128 count=1 2>/dev/null | base64 | tr -d "=+/[:space:]" | dd bs=32 count=1 2>/dev/null)
+
+# Check product_uuid
+$ sudo cat /sys/class/dmi/id/product_uuid
 ```
+
+## To Do
+
+* Configure Docker to make use of [systemd]([https://kubernetes.io/docs/setup/production-environment/container-runtimes/#docker)
