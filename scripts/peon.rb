@@ -7,6 +7,11 @@ class Peon
     worker_settings = instances.find { |item| item["type"] == "worker" }
     masters = (1..master_settings["count"]).each.map { |i| "#{master_settings["name"]}-#{i}" }
     workers = (1..worker_settings["count"]).each.map { |i| "#{worker_settings["name"]}-#{i}" }
+    pod_network_cidr = master_settings["settings"]["network"]["pod_network_cidr"] ||= ""
+    if pod_network_cidr.empty? then
+      abort "'pod_network_cidr' is required for instance type 'master'."
+    end
+    master_node_ip = ""
 
     instances.each_with_index do |instance, index|
       count = instance["count"]
@@ -23,11 +28,6 @@ class Peon
 
           network_settings = instance_settings["network"]
           node_ip = ""
-          master_node_ip = ""
-          pod_network_cidr = network_settings["pod_network_cidr"] ||= ""
-          if instance["type"] == "master" && pod_network_cidr.empty? then
-            abort "'pod_network_cidr' is required for instance type 'master'."
-          end
           node.vm.provider "virtualbox" do |vb|
             required_plugins = %w(vagrant-vbguest vagrant-disksize vagrant-share vagrant-sshfs)
             required_plugins.each do |plugin|
@@ -68,15 +68,15 @@ class Peon
           #  s.inline = "ansible-playbook /vagrant/ansible/playbook.yml -i \"localhost,\" -c local --extra-vars \"node_type=#{instance["type"]} apiserver_advertise_address=#{node_ip} pod_network_cidr=#{pod_network_cidr}\""
           #end
           
-          if index == instances.size - 1 && i == count then
+          if index == instances.size - 1 && i == count then            
             node.vm.provision :ansible do |ansible|
               # disable default limit to connect to all the machines
               ansible.limit = "all"
               ansible.playbook = "ansible/playbook.yml"
               ansible.extra_vars = {
-                "apiserver_advertise_address" => "#{master_node_ip}",
-                "pod_network_cidr" => "#{pod_network_cidr}"
-              }
+                "apiserver_advertise_address" => master_node_ip,
+                "pod_network_cidr" => pod_network_cidr
+              }              
               ansible.groups = {
                 "masters" => masters,
                 "workers" => workers
