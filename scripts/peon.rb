@@ -13,6 +13,7 @@ class Peon
     end
     master_node_ip = ""
     node_ip = ""
+    host_vars = {}
 
     instances.each_with_index do |instance, index|
       count = instance["count"]
@@ -41,7 +42,11 @@ class Peon
             #node.disksize.size = instance_settings["disk_size"] ||= "20GB"
             private_network_ip = network_settings["private_network_ip"].split(".")
             node_ip = "#{private_network_ip[0]}.#{private_network_ip[1]}.#{private_network_ip[2]}.#{private_network_ip[3].to_i + i}"
-            
+            instance_host_vars = {
+              instance_name => { "node_ip" => node_ip }
+            }
+            host_vars.merge!(instance_host_vars)
+
             if instance["type"] == "master" then
               master_node_ip = node_ip
             end
@@ -76,13 +81,13 @@ class Peon
               ansible.verbose = true
               ansible.extra_vars = {
                 "apiserver_advertise_address" => master_node_ip,
-                "pod_network_cidr" => pod_network_cidr,
-                "node_ip" => node_ip
+                "pod_network_cidr" => pod_network_cidr
               }              
               ansible.groups = {
                 "masters" => masters,
                 "workers" => workers
               }
+              ansible.host_vars = host_vars
             end        
           end
         end
