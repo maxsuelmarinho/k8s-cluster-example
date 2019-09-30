@@ -12,6 +12,7 @@ class Peon
       abort "'pod_network_cidr' is required for instance type 'master'."
     end
     master_node_ip = ""
+    node_ip = ""
 
     instances.each_with_index do |instance, index|
       count = instance["count"]
@@ -26,8 +27,7 @@ class Peon
           node.ssh.shell = "bash -c 'BASH_ENV=/etc/profile exec bash'"
           node.ssh.forward_agent = true
 
-          network_settings = instance_settings["network"]
-          node_ip = ""
+          network_settings = instance_settings["network"]          
           node.vm.provider "virtualbox" do |vb|
             required_plugins = %w(vagrant-vbguest vagrant-disksize vagrant-share vagrant-sshfs)
             required_plugins.each do |plugin|
@@ -76,7 +76,8 @@ class Peon
               ansible.verbose = true
               ansible.extra_vars = {
                 "apiserver_advertise_address" => master_node_ip,
-                "pod_network_cidr" => pod_network_cidr
+                "pod_network_cidr" => pod_network_cidr,
+                "node_ip" => node_ip
               }              
               ansible.groups = {
                 "masters" => masters,

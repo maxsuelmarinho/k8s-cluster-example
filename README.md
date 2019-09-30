@@ -49,6 +49,15 @@ $ TOKEN=$(dd if=/dev/urandom bs=128 count=1 2>/dev/null | base64 | tr -d "=+/[:s
 
 # Check product_uuid
 $ sudo cat /sys/class/dmi/id/product_uuid
+
+# check listened ports
+$ netstat -ntlp
+
+$ echo -n securepass | md5sum
+$ chmod 600 /etc/ha.d/authkeys
+
+# display hostname
+$ uname -n
 ```
 
 ```
@@ -104,3 +113,13 @@ $ kubeadm join kubeadm-ha.luxas.dev:6443 \
 ## To Do
 
 * Configure Docker to make use of [systemd]([https://kubernetes.io/docs/setup/production-environment/container-runtimes/#docker)
+
+## Vagrant on WSL
+
+```
+export VAGRANT_WSL_ENABLE_WINDOWS_ACCESS="1"
+export VAGRANT_WSL_WINDOWS_ACCESS_USER_HOME_PATH="$HOME"
+export PATH="${PATH}:/mnt/c/Program Files/Oracle/VirtualBox"
+#export VAGRANT_WSL_DISABLE_VAGRANT_HOME="true"
+#export VAGRANT_HOME="$HOME/k8s-cluster-example-local"
+```
