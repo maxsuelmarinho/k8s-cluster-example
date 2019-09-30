@@ -51,6 +51,56 @@ $ TOKEN=$(dd if=/dev/urandom bs=128 count=1 2>/dev/null | base64 | tr -d "=+/[:s
 $ sudo cat /sys/class/dmi/id/product_uuid
 ```
 
+```
+$ cat /kubeadm.yaml
+
+apiVersion: kubeadm.k8s.io/v1beta2
+kind: InitConfiguration
+bootstrapTokens:                                      
+- token: "co4zhu.timmt8nyl29udq96"                                      
+certificateKey: "d29a57954a7d92a3941cea3c9a9625df68d2cbdc0d10c4a7f42b354c1c27f2ca"                                      
+---
+apiVersion: kubeadm.k8s.io/v1beta2                                      
+kind: ClusterConfiguration                                      
+kubernetesVersion: v1.15.0-rc.1                                      
+controlPlaneEndpoint: kubeadm-ha.luxas.dev:6443                                      
+apiServer:                                      
+  certSANs:                                      
+  - "192.168.43.253"
+```
+
+```
+$ kubeadm init --config /kubeadm.yaml --upload-certs
+
+...
+You can now join any number of the control-plane node running the following command on each as root:             
+kubeadm join kubeadm-ha.luxas.dev:6443 --token co4zhu.timmt8nyl29udq96 \                                    
+    --discovery-token-ca-cert-hash sha256:c5afb11a8e7a26e7ffb5b57202a66f82322298ed926f6efa9c61e66a55d316a5 \
+    --experimental-control-plane --certificate-key d29a57954a7d92a3941cea3c9a9625df68d2cbdc0d10c4a7f42b354c1c27f2ca
+...
+
+Then you can join any number of worker nodes by running the following on each as root:                                              
+                                                                                                                                    
+kubeadm join kubeadm-ha.luxas.dev:6443 --token co4zhu.timmt8nyl29udq96 \                                      
+    --discovery-token-ca-cert-hash sha256:c5afb11a8e7a26e7ffb5b57202a66f82322298ed926f6efa9c61e66a55d316a5
+
+```
+
+```
+$ export KUBECONFIG=/etc/kubernetes/admin.conf
+$ kubectl apply -f https://git.io/weave-kube-1.6
+
+# second master node
+$ export TOKEN=co4zhu.timmt8nyl29udq96                                      
+$ export CERT_KEY=d29a57954a7d92a3941cea3c9a9625df68d2cbdc0d10c4a7f42b354c1c27f2ca                                      
+$ export CA_HASH=c5afb11a8e7a26e7ffb5b57202a66f82322298ed926f6efa9c61e66a55d316a5
+$ kubeadm join kubeadm-ha.luxas.dev:6443 \
+    --token ${TOKEN} \                                    
+	--discovery-token-ca-cert-hash sha256:${CA_HASH} \                                    
+	--certificate-key ${CERT_KEY} \                                    
+	--control-plane
+```
+
 ## To Do
 
 * Configure Docker to make use of [systemd]([https://kubernetes.io/docs/setup/production-environment/container-runtimes/#docker)

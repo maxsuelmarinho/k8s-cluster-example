@@ -73,6 +73,7 @@ class Peon
               # disable default limit to connect to all the machines
               ansible.limit = "all"
               ansible.playbook = "ansible/playbook.yml"
+              ansible.verbose = true
               ansible.extra_vars = {
                 "apiserver_advertise_address" => master_node_ip,
                 "pod_network_cidr" => pod_network_cidr
