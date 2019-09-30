@@ -33,6 +33,17 @@
     - kubeadm
     - kubectl
 
+- name: Configure node ip
+  lineinfile:
+    path: /etc/default/kubelet
+    line: KUBELET_EXTRA_ARGS=--node-ip={{ node_ip }}
+
+- name: Restart kubelet
+  service:
+    name: kubelet
+    daemon_reload: yes
+    state: restarted
+
 - name: ensure kubelet is running
   service:
     name: kubelet
