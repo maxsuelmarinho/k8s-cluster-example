@@ -37,7 +37,7 @@
 
 - name: extra vars
   debug:
-    msg: "apiserver_advertise_address: {{ apiserver_advertise_address }}; pod_network_cidr: {{ pod_network_cidr }}"
+    msg: "apiserver_advertise_address: {{ apiserver_advertise_address }}; pod_network_cidr: {{ pod_network_cidr }}; node_ip: {{ node_ip }}"
 
 - name: create .kube directory
   become: no
