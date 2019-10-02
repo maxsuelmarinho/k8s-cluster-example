@@ -25,6 +25,19 @@
     path: /etc/fstab
     regexp: '^(.+?\sswap\s+sw\s+.*)$'
     replace: '# \1'
+
+- name: Remove swapfile from /etc/fstab
+  mount:
+    name: "{{ item }}"
+    fstype: swap
+    state: absent
+  with_items:
+    - swap
+    - none
+
+- name: Disable swap
+  command: swapoff -a
+  when: ansible_swaptotal_mb > 0
     
 - name: install required packages
   yum:
@@ -40,7 +53,7 @@
 - name: Configure node ip
   lineinfile:
     path: /etc/sysconfig/kubelet
-    line: KUBELET_EXTRA_ARGS=--node-ip={{ node_ip }}
+    line: KUBELET_EXTRA_ARGS=--node-ip={{ node_ip }} --cgroup-driver=systemd
 
 - name: Restart kubelet
   service:
