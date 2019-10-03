@@ -7,8 +7,9 @@ instances:
     cpus: 2
     memory: 2048
     disk_size: "20GB"
-    vbguest_auto_update: true
-    box_check_update: true
+    vbguest_auto_update: false
+    box_check_update: false
+    box_version: "1812.01"
     network:
       private_network_ip: "192.168.33.100"
       pod_network_cidr: "192.168.0.0/16"
@@ -20,7 +21,8 @@ instances:
     cpus: 2
     memory: 1024
     disk_size: "20GB"
-    vbguest_auto_update: true
-    box_check_update: true
+    vbguest_auto_update: false
+    box_check_update: false
+    box_version: "1812.01"
     network:
       private_network_ip: "192.168.33.200"

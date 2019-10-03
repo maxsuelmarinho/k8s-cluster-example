@@ -24,6 +24,7 @@ class Peon
           node.vm.hostname = instance_name
           instance_settings = instance["settings"]
           node.vm.box = instance_settings["box"]
+          node.vm.box_version = instance_settings["box_version"] ||= "1804.02"
           node.vm.box_check_update = instance_settings["box_check_update"] ||= true
           node.ssh.shell = "bash -c 'BASH_ENV=/etc/profile exec bash'"
           node.ssh.forward_agent = true
@@ -60,6 +61,11 @@ class Peon
             vb.customize ["setextradata", :id, "VBoxInternal2/SharedFoldersEnableSymlinksCreate/v-root", "1"]      
             vb.customize ["modifyvm", :id, "--memory", instance_settings["memory"] ||= "1024"]
             vb.customize ["modifyvm", :id, "--cpus", instance_settings["cpus"] ||= "1"]
+          end
+
+          config.vm.provision "shell" do |s|
+            s.name = "DNS config"
+            s.path = scripts_home + "/dns-config.sh"
           end
 
           #node.vm.provision "shell" do |s|
