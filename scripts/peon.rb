@@ -8,6 +8,7 @@ class Peon
     masters = (1..master_settings["count"]).each.map { |i| "#{master_settings["name"]}-#{i}" }
     workers = (1..worker_settings["count"]).each.map { |i| "#{worker_settings["name"]}-#{i}" }
     pod_network_cidr = master_settings["settings"]["network"]["pod_network_cidr"] ||= ""
+    cgroup_driver = master_settings["settings"]["cgroup_driver"]
     if pod_network_cidr.empty? then
       abort "'pod_network_cidr' is required for instance type 'master'."
     end
@@ -87,7 +88,8 @@ class Peon
               ansible.verbose = true
               ansible.extra_vars = {
                 "apiserver_advertise_address" => master_node_ip,
-                "pod_network_cidr" => pod_network_cidr
+                "pod_network_cidr" => pod_network_cidr,
+                "cgroup_driver" => cgroup_driver
               }              
               ansible.groups = {
                 "masters" => masters,

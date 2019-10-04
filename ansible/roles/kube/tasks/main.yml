@@ -53,7 +53,7 @@
 - name: Configure node ip
   lineinfile:
     path: /etc/sysconfig/kubelet
-    line: KUBELET_EXTRA_ARGS=--node-ip={{ node_ip }} --cgroup-driver=systemd
+    line: KUBELET_EXTRA_ARGS=--node-ip={{ node_ip }} --cgroup-driver={{ cgroup_driver }}
 
 - name: Restart kubelet
   service:
