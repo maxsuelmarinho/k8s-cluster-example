@@ -106,6 +106,10 @@
     group: root
     mode: "a+x"
 
+- name: Copy join command to local file
+  become: no
+  local_action: copy content="{{ join_command.stdout_lines[0] }}" dest="./join-command"
+  
 - name: Set fact for kubeadm join command
   set_fact:
     kubeadm_join_cmd: "{{ join_command.stdout }}"

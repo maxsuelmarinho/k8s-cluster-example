@@ -15,4 +15,10 @@
 - name: join cluster 2/2
   command: '{{ hostvars[groups["masters"][0]]["kubeadm_join_cmd"] }}'
   when: join_command.stat.isFile is undefined
-  
+  ignore_errors: true
+
+- name: Copy the join command to server location
+  copy: src=join-command dest=/tmp/join-command.sh mode=0777
+
+- name: Join the node to cluster
+  command: sh /tmp/join-command.sh
