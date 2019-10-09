@@ -1,7 +1,7 @@
 ---
-- name:  reset all kubeadm installed state
-  command: kubeadm reset --force
-  ignore_errors: true
+- debug: msg="reset k8s state"
+  notify:
+  - reset all kubeadm installed state
 
 - stat:
     path: /vagrant/join-command.sh
@@ -18,10 +18,17 @@
   ignore_errors: true
   register: join_command_by_facts
 
-- name: Copy the join command to server location
+- name: join cluster part 2 - copy the join command to server location 1/3
   copy: src=join-command dest=/tmp/join-command.sh mode=0777
   when: join_command_by_facts.rc != 0
 
-- name: Join the node to cluster
+- debug: msg="join cluster part 2 - call kubeadm reset 2/3"
+  when: join_command_by_facts.rc != 0
+  notify:
+  - reset all kubeadm installed state
+  - ensure kubelet is running
+
+- name: join cluster part 2 - join the node to cluster 3/3
   command: sh /tmp/join-command.sh
+  become: yes
   when: join_command_by_facts.rc != 0
