@@ -123,3 +123,20 @@ export PATH="${PATH}:/mnt/c/Program Files/Oracle/VirtualBox"
 #export VAGRANT_WSL_DISABLE_VAGRANT_HOME="true"
 #export VAGRANT_HOME="$HOME/k8s-cluster-example-local"
 ```
+
+**Administer the cluster from your host**
+```shell
+$ curl -LO https://storage.googleapis.com/kubernetes-release/release/`curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt`/bin/linux/amd64/kubectl \
+    && chmod +x ./kubectl \
+    && sudo mv ./kubectl /usr/local/bin/kubectl
+
+$ vagrant ssh-config kubemaster-1 > ~/.ssh/config
+$ chown $USER ~/.ssh/config
+$ chmod 600 ~/.ssh/config
+$ mkdir ~/.kube
+$ scp -P 2222 vagrant@kubemaster-1:/home/vagrant/.kube/config ~/.kube/config
+
+$ kubectl cluster-info
+$ kubectl get nodes --all-namespaces
+$ kubectl get pods --all-namespaces
+``` 

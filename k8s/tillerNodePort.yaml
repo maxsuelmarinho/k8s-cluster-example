@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: helm
+    name: tiller
+  name: tiller
+  namespace: kube-system
+spec:
+  ports:
+  - name: port-1
+    nodePort: 32492 #Tiller Kubernetes "extenal" port
+    port: 44134 #Tiller "Internal" port
+    protocol: TCP
+    targetPort: tiller  
+  selector:
+    app: helm
+    name: tiller
+  sessionAffinity: None
+  type: NodePort
