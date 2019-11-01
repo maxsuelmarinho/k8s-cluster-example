@@ -78,7 +78,7 @@
   become: no
   command: kubectl apply -f {{ item }}
   loop:
-    - https://docs.projectcalico.org/v3.8/manifests/calico.yaml
+    - https://docs.projectcalico.org/v3.10/manifests/calico.yaml
   
 - name: list tokens
   command: kubeadm token list

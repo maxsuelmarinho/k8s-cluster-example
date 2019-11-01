@@ -130,7 +130,7 @@ $ curl -LO https://storage.googleapis.com/kubernetes-release/release/`curl -s ht
     && chmod +x ./kubectl \
     && sudo mv ./kubectl /usr/local/bin/kubectl
 
-$ vagrant ssh-config kubemaster-1 > ~/.ssh/config
+$ vagrant ssh-config kubemaster-1 >> ~/.ssh/config
 $ chown $USER ~/.ssh/config
 $ chmod 600 ~/.ssh/config
 $ mkdir ~/.kube
