@@ -139,4 +139,9 @@ $ scp -P 2222 vagrant@kubemaster-1:/home/vagrant/.kube/config ~/.kube/config
 $ kubectl cluster-info
 $ kubectl get nodes --all-namespaces
 $ kubectl get pods --all-namespaces
-``` 
+```
+
+**Istio Services**
+
+- **Prometheus:** http://192.168.33.201:32090/
+

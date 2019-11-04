@@ -74,12 +74,17 @@
     owner: root
     group: root
 
+# https://docs.projectcalico.org/v3.9/manifests/calico.yaml
+# https://docs.projectcalico.org/v3.9/getting-started/kubernetes/installation/calico
+- name: rewrite calico.yaml
+  template:
+     src: calico/3.9/calico.yaml
+     dest: /home/vagrant/calico.yaml 
+    
 - name: deploy pod network
-  become: no
-  command: kubectl apply -f {{ item }}
-  loop:
-    - https://docs.projectcalico.org/v3.10/manifests/calico.yaml
-  
+  become: false
+  command: kubectl apply -f /home/vagrant/calico.yaml
+
 - name: list tokens
   command: kubeadm token list
   register: kubeadm_token_list
