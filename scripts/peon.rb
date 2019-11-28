@@ -52,6 +52,24 @@ class Peon
             if instance["type"] == "master" then
               master_node_ip = node_ip
             end
+
+            # Standardize Ports Naming Schema
+            if network_settings.include? "ports"
+              network_settings["ports"].each do |port|
+                port["guest"] ||= port["to"]
+                port["host"] ||= port["send"]
+                port["protocol"] ||= "tcp"
+              end
+            else
+              network_settings["ports"] = []
+            end
+            
+            # Add Custom Ports From Configuration
+            if network_settings.include? "ports"
+              network_settings["ports"].each do |port|
+                config.vm.network "forwarded_port", guest: port["guest"], host: port["host"], protocol: port["protocol"], auto_correct: true
+              end
+            end
             
             node.vm.network :private_network, ip: node_ip
 
