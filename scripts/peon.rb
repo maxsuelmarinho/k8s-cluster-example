@@ -13,6 +13,7 @@ class Peon
       abort "'pod_network_cidr' is required for instance type 'master'."
     end
     master_node_ip = ""
+    cert_extra_sans = ""
     node_ip = ""
     host_vars = {}
 
@@ -51,6 +52,11 @@ class Peon
 
             if instance["type"] == "master" then
               master_node_ip = node_ip
+              if network_settings.include? "cert_extra_sans"
+                cert_extra_sans = "#{master_node_ip},#{network_settings["cert_extra_sans"]}"
+              else
+                cert_extra_sans = master_node_ip
+              end              
             end
 
             # Standardize Ports Naming Schema
@@ -106,6 +112,7 @@ class Peon
               ansible.verbose = true
               ansible.extra_vars = {
                 "apiserver_advertise_address" => master_node_ip,
+                "cert_extra_sans" => cert_extra_sans,
                 "pod_network_cidr" => pod_network_cidr,
                 "cgroup_driver" => cgroup_driver
               }              
