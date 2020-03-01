@@ -13,6 +13,7 @@ instances:
     cgroup_driver: cgroupfs
     network:
       private_network_ip: "192.168.33.100"
+      cert_extra_sans: "peon,peasant,192.168.0.18"
       pod_network_cidr: "192.168.0.0/16"
       ports:
       - send: 6443
