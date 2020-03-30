@@ -51,7 +51,7 @@
 - name: copy kube config
   copy:
     src: /etc/kubernetes/admin.conf
-    dest: '{{ kube_dir.path }}/config'
+    dest: "{{ kube_dir.path }}/config"
     remote_src: yes
     owner: vagrant
     group: vagrant
@@ -69,7 +69,7 @@
   become: yes
   copy:
     src: /etc/kubernetes/admin.conf
-    dest: '{{ root_kube_dir.path }}/config'
+    dest: "{{ root_kube_dir.path }}/config"
     remote_src: yes
     owner: root
     group: root
@@ -78,9 +78,9 @@
 # https://docs.projectcalico.org/v3.9/getting-started/kubernetes/installation/calico
 - name: rewrite calico.yaml
   template:
-     src: calico/3.9/calico.yaml
-     dest: /home/vagrant/calico.yaml 
-    
+    src: calico/3.9/calico.yaml
+    dest: /home/vagrant/calico.yaml
+
 - name: deploy pod network
   become: false
   command: kubectl apply -f /home/vagrant/calico.yaml
@@ -113,8 +113,8 @@
 
 - name: Copy join command to local file
   become: no
-  local_action: copy content="{{ join_command.stdout_lines[0] }}" dest="./join-command"
-  
+  local_action: copy content="{{ join_command.stdout_lines[0] }}" dest="/vagrant/join-command"
+
 - name: Set fact for kubeadm join command
   set_fact:
     kubeadm_join_cmd: "{{ join_command.stdout }}"

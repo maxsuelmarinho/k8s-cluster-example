@@ -1,5 +1,5 @@
 ---
-- hosts: all
+- hosts: "masters,workers"
   become: yes
   become_method: sudo
   gather_facts: true

@@ -1,6 +1,7 @@
 # K8S Cluster Example
 
 ## Useful commands
+
 ```
 # logs
 $ sudo journalctl -u kubelet
@@ -65,16 +66,16 @@ $ cat /kubeadm.yaml
 
 apiVersion: kubeadm.k8s.io/v1beta2
 kind: InitConfiguration
-bootstrapTokens:                                      
-- token: "co4zhu.timmt8nyl29udq96"                                      
-certificateKey: "d29a57954a7d92a3941cea3c9a9625df68d2cbdc0d10c4a7f42b354c1c27f2ca"                                      
+bootstrapTokens:
+- token: "co4zhu.timmt8nyl29udq96"
+certificateKey: "d29a57954a7d92a3941cea3c9a9625df68d2cbdc0d10c4a7f42b354c1c27f2ca"
 ---
-apiVersion: kubeadm.k8s.io/v1beta2                                      
-kind: ClusterConfiguration                                      
-kubernetesVersion: v1.15.0-rc.1                                      
-controlPlaneEndpoint: kubeadm-ha.luxas.dev:6443                                      
-apiServer:                                      
-  certSANs:                                      
+apiVersion: kubeadm.k8s.io/v1beta2
+kind: ClusterConfiguration
+kubernetesVersion: v1.15.0-rc.1
+controlPlaneEndpoint: kubeadm-ha.luxas.dev:6443
+apiServer:
+  certSANs:
   - "192.168.43.253"
 ```
 
@@ -82,15 +83,15 @@ apiServer:
 $ kubeadm init --config /kubeadm.yaml --upload-certs
 
 ...
-You can now join any number of the control-plane node running the following command on each as root:             
-kubeadm join kubeadm-ha.luxas.dev:6443 --token co4zhu.timmt8nyl29udq96 \                                    
+You can now join any number of the control-plane node running the following command on each as root:
+kubeadm join kubeadm-ha.luxas.dev:6443 --token co4zhu.timmt8nyl29udq96 \
     --discovery-token-ca-cert-hash sha256:c5afb11a8e7a26e7ffb5b57202a66f82322298ed926f6efa9c61e66a55d316a5 \
     --experimental-control-plane --certificate-key d29a57954a7d92a3941cea3c9a9625df68d2cbdc0d10c4a7f42b354c1c27f2ca
 ...
 
-Then you can join any number of worker nodes by running the following on each as root:                                              
-                                                                                                                                    
-kubeadm join kubeadm-ha.luxas.dev:6443 --token co4zhu.timmt8nyl29udq96 \                                      
+Then you can join any number of worker nodes by running the following on each as root:
+
+kubeadm join kubeadm-ha.luxas.dev:6443 --token co4zhu.timmt8nyl29udq96 \
     --discovery-token-ca-cert-hash sha256:c5afb11a8e7a26e7ffb5b57202a66f82322298ed926f6efa9c61e66a55d316a5
 
 ```
@@ -100,19 +101,19 @@ $ export KUBECONFIG=/etc/kubernetes/admin.conf
 $ kubectl apply -f https://git.io/weave-kube-1.6
 
 # second master node
-$ export TOKEN=co4zhu.timmt8nyl29udq96                                      
-$ export CERT_KEY=d29a57954a7d92a3941cea3c9a9625df68d2cbdc0d10c4a7f42b354c1c27f2ca                                      
+$ export TOKEN=co4zhu.timmt8nyl29udq96
+$ export CERT_KEY=d29a57954a7d92a3941cea3c9a9625df68d2cbdc0d10c4a7f42b354c1c27f2ca
 $ export CA_HASH=c5afb11a8e7a26e7ffb5b57202a66f82322298ed926f6efa9c61e66a55d316a5
 $ kubeadm join kubeadm-ha.luxas.dev:6443 \
-    --token ${TOKEN} \                                    
-	--discovery-token-ca-cert-hash sha256:${CA_HASH} \                                    
-	--certificate-key ${CERT_KEY} \                                    
+    --token ${TOKEN} \
+	--discovery-token-ca-cert-hash sha256:${CA_HASH} \
+	--certificate-key ${CERT_KEY} \
 	--control-plane
 ```
 
 ## To Do
 
-* Configure Docker to make use of [systemd]([https://kubernetes.io/docs/setup/production-environment/container-runtimes/#docker)
+- Configure Docker to make use of [systemd]([https://kubernetes.io/docs/setup/production-environment/container-runtimes/#docker)
 
 ## Vagrant on WSL
 
@@ -124,7 +125,23 @@ export PATH="${PATH}:/mnt/c/Program Files/Oracle/VirtualBox"
 #export VAGRANT_HOME="$HOME/k8s-cluster-example-local"
 ```
 
+**VirtualBox Commands**
+
+```shell
+# Bridge name
+$ VBoxManage list bridgedifs | grep ^Name
+$ VBoxManage startvm <vm-uuid> --type emergencystop
+$ vboxmanage hostonlyif remove "VirtualBox Host-Only Ethernet Adapter #3"
+```
+
+**Ansible Commands**
+
+```shell
+$ PYTHONUNBUFFERED=1 ANSIBLE_FORCE_COLOR=true ANSIBLE_HOST_KEY_CHECKING=false ANSIBLE_SSH_ARGS='-o UserKnownHostsFile=/dev/null -o IdentitiesOnly=yes -o ForwardAgent=yes -o ControlMaster=auto -o ControlPersist=60s' ansible-playbook --connection=ssh --timeout=30 --limit="all" --inventory-file=/home/maxsuel/k8s-cluster-example/.vagrant/provisioners/ansible/inventory --extra-vars={"apiserver_advertise_address":"192.168.0.102","cert_extra_sans":"192.168.0.102,192.168.33.101,peon,peasant,192.168.0.18","pod_network_cidr":"192.168.0.0/16","cgroup_driver":"cgroupfs"} -v ansible/playbook.yml
+```
+
 **Administer the cluster from your host**
+
 ```shell
 $ curl -LO https://storage.googleapis.com/kubernetes-release/release/`curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt`/bin/linux/amd64/kubectl \
     && chmod +x ./kubectl \
@@ -145,3 +162,20 @@ $ kubectl get pods --all-namespaces
 
 - **Prometheus:** http://192.168.33.201:32090/
 
+## Vagrant Box
+
+- bento/centos
+  - name: bento/centos-7.7
+  - version: 202002.04.0
+- bento/centos
+  - name: bento/centos-7
+  - version: 202002.04.0
+- bento/centos
+  - name: bento/centos-8.1
+  - version: 202002.04.0
+- centos
+  - name: centos/7
+  - version: 1905.1
+- centos
+  - name: centos/7
+  - version: 1804.02

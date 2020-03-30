@@ -1,8 +1,4 @@
 ---
-- name: extra vars
-  debug:
-    msg: "apiserver_advertise_address: {{ apiserver_advertise_address }}; pod_network_cidr: {{ pod_network_cidr }}; node_ip: {{ node_ip }}"
-
 - name: add kubernetes repository
   yum_repository:
     name: Kubernetes
@@ -38,7 +34,7 @@
 - name: Disable swap
   command: swapoff -a
   when: ansible_swaptotal_mb > 0
-    
+
 - name: install required packages
   yum:
     name: "{{ packages }}"
@@ -46,9 +42,9 @@
     update_cache: yes
   vars:
     packages:
-    - kubelet
-    - kubeadm
-    - kubectl
+      - kubelet
+      - kubeadm
+      - kubectl
 
 - name: Configure node ip
   lineinfile:
