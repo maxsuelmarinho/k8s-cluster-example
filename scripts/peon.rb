@@ -114,8 +114,6 @@ class Peon
             vb.customize ["modifyvm", :id, "--cpus", instance_settings["cpus"] ||= "1"]
           end
 
-          config.vm.synced_folder ".", "/vagrant", type: "virtualbox"
-
           #config.vm.provision "shell" do |s|
           #  s.name = "DNS config"
           #  s.path = scripts_home + "/dns-config.sh"
@@ -171,7 +169,7 @@ class Peon
               _retry=true
           end
         end
-        provisioner.vbguest.auto_update = master_settings["settings"]["vbguest_auto_update"]
+        provisioner.vbguest.auto_update = true
       end
 
       config.vm.synced_folder ".", "/vagrant", type: "virtualbox", owner: "vagrant", mount_options: ["dmode=775,fmode=600"]
