@@ -37,8 +37,8 @@ class Peon
 
           network_settings = instance_settings["network"]
           private_network_ip = network_settings["private_network_ip"].split(".")
-          node_ip = "#{private_network_ip[0]}.#{private_network_ip[1]}.#{private_network_ip[2]}.#{private_network_ip[3].to_i + i + (i % 2 == 0 ? 1 : 0)}" # odd ip
-          public_node_ip = "#{private_network_ip[0]}.#{private_network_ip[1]}.0.#{private_network_ip[3].to_i + i + (i % 2 == 0 ? 0 : 1)}" # even ip
+          node_ip = "#{private_network_ip[0]}.#{private_network_ip[1]}.#{private_network_ip[2]}.#{private_network_ip[3].to_i + i}"
+          public_node_ip = "#{private_network_ip[0]}.#{private_network_ip[1]}.0.#{private_network_ip[3].to_i + i}"
           
           node.vm.network :private_network, ip: node_ip
           node.vm.network :public_network, ip: public_node_ip
