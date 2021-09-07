@@ -4,11 +4,12 @@
   become_method: sudo
   gather_facts: true
   roles:
-    - epel-repository
+    - role: epel-repository
+      when: ansible_facts['distribution'] == 'CentOS'
     - role: common
       when: skip_role_common is undefined
-    - docker
-    - kube
+    - role: docker
+    - role: kube
 
 - hosts: masters
   become: yes

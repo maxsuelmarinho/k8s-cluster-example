@@ -1,1 +1,4 @@
 k8s_master_pod_network_cidr: "192.168.112.0/20"
+k8s_version: "v1.22.1"
+# v1.18.20
+# v1.10.10

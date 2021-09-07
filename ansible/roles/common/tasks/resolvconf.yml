@@ -1,0 +1,24 @@
+---
+- name: install resolvconf
+  package:
+    name: "resolvconf"
+    state: present
+    update_cache: yes
+
+- name: ensure resolvconf is running
+  service:
+    name: resolvconf
+    state: started
+    enabled: yes
+
+- name: add google dns 8.8.8.8
+  lineinfile:
+    path: /etc/resolvconf/resolv.conf.d/head
+    line: nameserver 8.8.8.8
+    state: present
+
+- name: add google dns 8.8.4.4
+  lineinfile:
+    path: /etc/resolvconf/resolv.conf.d/head
+    line: nameserver 8.8.4.4
+    state: present

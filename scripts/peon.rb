@@ -43,14 +43,14 @@ class Peon
           node.vm.network :private_network, ip: node_ip
           node.vm.network :public_network, ip: public_node_ip
           
-          node.vm.provision "shell" do |s|
-            s.name = "Prevent problem with vbguest and shared folders"
-            s.inline = <<-SHELL
-            sudo yum update -y \
-              && sudo yum -y install kernel-devel kernel-headers dkms gcc gcc-c++ \
-              && sudo yum -y update kernel
-            SHELL
-          end
+          # node.vm.provision "shell" do |s|
+          #   s.name = "Prevent problem with vbguest and shared folders"
+          #   s.inline = <<-SHELL
+          #   sudo yum update -y \
+          #     && sudo yum -y install kernel-devel kernel-headers dkms gcc gcc-c++ \
+          #     && sudo yum -y update kernel
+          #   SHELL
+          # end
 
           # Standardize Ports Naming Schema
           if network_settings.include? "ports"
@@ -144,14 +144,14 @@ class Peon
       provisioner.ssh.shell = "bash -c 'BASH_ENV=/etc/profile exec bash'"
       provisioner.ssh.forward_agent = true
 
-      provisioner.vm.provision "shell" do |s|
-        s.name = "Prevent problem with vbguest and shared folders"
-        s.inline = <<-SHELL
-        sudo yum update -y \
-          && sudo yum -y install kernel-devel kernel-headers dkms gcc gcc-c++ \
-          && sudo yum -y update kernel
-        SHELL
-      end
+      # provisioner.vm.provision "shell" do |s|
+      #   s.name = "Prevent problem with vbguest and shared folders"
+      #   s.inline = <<-SHELL
+      #   sudo yum update -y \
+      #     && sudo yum -y install kernel-devel kernel-headers dkms gcc gcc-c++ \
+      #     && sudo yum -y update kernel
+      #   SHELL
+      # end
 
       provisioner.vm.provider "virtualbox" do |vb|
         vb.name = provisioner_machine_name

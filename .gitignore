@@ -1,2 +1,4 @@
 .vagrant
-join-command
+join-command*
+ubuntu-bionic*.log
+*.old

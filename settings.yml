@@ -3,14 +3,14 @@ instances:
     type: "master"
     count: 1
     settings:
-      box: "centos/7"
-      box_version: "1804.02"
-      box_check_update: false
+      box: "ubuntu/bionic64"
+      box_version: "20210831.0.0"
+      box_check_update: true
       cpus: 2
       memory: 2048
       disk_size: "20GB"
-      vbguest_auto_update: false
-      cgroup_driver: "cgroupfs"
+      vbguest_auto_update: true
+      cgroup_driver: "systemd"
       network:
         private_network_ip: "192.168.33.100"
         cert_extra_sans: "peon,peasant,192.168.0.18"
@@ -22,13 +22,13 @@ instances:
     type: "worker"
     count: 1
     settings:
-      box: "centos/7"
-      box_version: "1804.02"
-      box_check_update: false
+      box: "ubuntu/bionic64"
+      box_version: "20210831.0.0"
+      box_check_update: true
       cpus: 2
       memory: 2048
       disk_size: "20GB"
-      vbguest_auto_update: false
-      cgroup_driver: "cgroupfs"
+      vbguest_auto_update: true
+      cgroup_driver: "systemd"
       network:
         private_network_ip: "192.168.33.200"

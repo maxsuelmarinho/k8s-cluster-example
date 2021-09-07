@@ -1,22 +1,13 @@
 ---
 - name: upgrade all packages
-  yum:
+  package:
     name: "*"
     state: latest
 
-- name: install packages
-  yum:
-    name: "{{ packages }}"
+- include_tasks: resolvconf.yml
+  when: ansible_facts['distribution'] == 'Ubuntu'
+
+- name: install common packages
+  package:
+    name: "{{ common_packages }}"
     state: latest
-  vars:
-    packages:
-    - vim
-    - wget
-    - unzip
-    - net-tools
-    - sshpass
-    - tree
-    - vim
-    - git
-    - jq
-    - httpie

@@ -179,3 +179,12 @@ $ kubectl get pods --all-namespaces
 - centos
   - name: centos/7
   - version: 1804.02
+
+```shell
+# MAC address
+$ ip link
+$ ifconfig -a
+
+# product_uuid
+$ sudo cat /sys/class/dmi/id/product_uuid
+```

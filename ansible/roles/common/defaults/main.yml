@@ -1,0 +1,12 @@
+---
+common_packages:
+  - wget
+  - unzip
+  - net-tools
+  - sshpass
+  - tree
+  - vim
+  - git
+  - jq
+  - httpie
+

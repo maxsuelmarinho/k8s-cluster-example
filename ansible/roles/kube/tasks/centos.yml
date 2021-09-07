@@ -1,0 +1,20 @@
+- name: add kubernetes repository
+  yum_repository:
+    name: Kubernetes
+    description: Kubernetes repo
+    baseurl: https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+    repo_gpgcheck: yes
+    enabled: yes
+    gpgcheck: yes
+    gpgkey: https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+
+- name: disable SELinux
+  selinux:
+    state: disabled
+
+- name: configure node ip
+  lineinfile:
+    path: /etc/sysconfig/kubelet
+    line: KUBELET_EXTRA_ARGS=--node-ip={{ node_ip }} --cgroup-driver={{ cgroup_driver }}
+    create: yes
+    state: present

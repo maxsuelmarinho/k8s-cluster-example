@@ -1,0 +1,46 @@
+- name: check docker version
+  shell: "docker version 2>&1 | awk '/Version:/{print $2}' | head -1"
+  register: docker_check
+
+- name: remove old docker versions
+  yum:
+    name: "{{ packages }}"
+    state: removed
+  vars:
+    packages:
+    - docker
+    - docker-client
+    - docker-client-latest
+    - docker-common
+    - docker-latest
+    - docker-latest-logrotate
+    - docker-logrotate
+    - docker-selinux
+    - docker-engine-selinux
+    - docker-engine
+    - docker-ce*
+  when: docker_check.stdout.find(docker_version) != 0
+
+- name: install required packages
+  yum:
+    name: "{{ packages }}"
+    state: latest
+  vars:
+    packages:
+    - yum-utils
+    - device-mapper-persistent-data
+    - lvm2
+  when: docker_check.stdout.find(docker_version) != 0
+
+- name: add docker ce stable repository
+  get_url:
+    url: https://download.docker.com/linux/centos/docker-ce.repo
+    dest: /etc/yum.repos.d/docker-ce.repo
+    mode: 0644
+  when: docker_check.stdout.find(docker_version) != 0
+
+- name: install docker ce v{{ docker_version }}
+  yum:
+    name: "docker-ce-{{ docker_version }}*"
+    state: present
+    update_cache: yes

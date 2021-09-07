@@ -1,0 +1,6 @@
+---
+kubelet_config_filepath:
+  Debian:
+  - /etc/default/kubelet
+  RedHat:
+  - /etc/sysconfig/kubelet

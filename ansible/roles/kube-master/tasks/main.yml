@@ -10,7 +10,7 @@
 - debug: var=kubeadm_config_images_pull.stdout_lines
 
 - name: check kubeadm is already initialized 1/2
-  command: "kubeadm init --dry-run --apiserver-advertise-address={{ apiserver_advertise_address }} --pod-network-cidr={{ pod_network_cidr }} --apiserver-cert-extra-sans={{ cert_extra_sans }}"
+  command: "kubeadm init --dry-run --kubernetes-version={{ k8s_version }} --apiserver-advertise-address={{ apiserver_advertise_address }} --pod-network-cidr={{ pod_network_cidr }} --apiserver-cert-extra-sans={{ cert_extra_sans }}"
   register: kubeadm_check_1
   ignore_errors: True
 
@@ -29,7 +29,7 @@
   when: kubeadm_check_1.rc != 0 and kubeadm_check_2.rc != 0
 
 - name: initialise master node
-  command: "kubeadm init --apiserver-advertise-address={{ apiserver_advertise_address }} --pod-network-cidr={{ pod_network_cidr }} --apiserver-cert-extra-sans={{ cert_extra_sans }}"
+  command: "kubeadm init --kubernetes-version={{ k8s_version }} --apiserver-advertise-address={{ apiserver_advertise_address }} --pod-network-cidr={{ pod_network_cidr }} --apiserver-cert-extra-sans={{ cert_extra_sans }}"
   register: kubeadm_init_output
   when: kubeadm_check_1.rc == 0
 
@@ -78,7 +78,7 @@
 # https://docs.projectcalico.org/v3.9/getting-started/kubernetes/installation/calico
 - name: rewrite calico.yaml
   template:
-    src: calico/3.9/calico.yaml
+    src: calico/3.20/calico.yaml
     dest: /home/vagrant/calico.yaml
 
 - name: deploy pod network
